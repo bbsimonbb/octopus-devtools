@@ -2,6 +2,7 @@
 import { ITraversalReport } from './ITraversalReport'
 import port from "./port"
 import testData from "./testData"
+import {startCase} from "lodash"
 import {
   ForceLayout,
   ForceNodeDatum,
@@ -30,7 +31,7 @@ export default {
 
       this.store.traversalReport.data.nodes.forEach((n) => {
         Object.defineProperty(nodes, n, {
-          value: { name: n },
+          value: { name: startCase(n) },
           configurable: true,
           enumerable: true,
           writable: true,
@@ -87,7 +88,7 @@ export default {
         node: {
           normal: {
             type: "rect",
-            width: 32,
+            width: 170,
             height: 32,
             borderRadius: 6,
             color: "#ffffff",
@@ -97,6 +98,9 @@ export default {
           hover: {
             color: "#eeeeee",
           },
+        label:{
+          direction:"center"
+        },
 
         },
         edge: {
