@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "crx-bridge": "^3.0.1",
+    "d3": "^7.8.0",
+    "dagre": "^0.8.5",
+    "v-network-graph": "^0.8.1",
     "vue": "^3.2.45"
   },
   "devDependencies": {
