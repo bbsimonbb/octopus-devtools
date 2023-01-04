@@ -1,18 +1,112 @@
 <script lang="ts">
+// https://yajanarao.medium.com/create-a-data-flow-map-using-cytoscape-and-vue-js-5be3b3ef11d2
 import { ITraversalReport } from './ITraversalReport'
 import port from "./port"
 import testData from "./testData"
-import {startCase} from "lodash"
-import {
-  ForceLayout,
-  ForceNodeDatum,
-  ForceEdgeDatum,
-} from "v-network-graph/lib/force-layout"
+import { startCase } from "lodash"
+import cydagre from "cytoscape-dagre";
+import cytoscape from "cytoscape";
+import { stringifyStyle } from '@vue/shared';
 
 const store: { traversalReport: ITraversalReport } = { traversalReport: testData }
 
+function nodesAndEdges(traversalReport) {
+  var nodes = []
+  var edges = []
+
+  traversalReport.data.nodes.forEach((n) => {
+    nodes.push(
+      {
+        data: {
+          id: n,
+          name: startCase(n),
+          description: "",
+          active: false,
+          width: 200
+        }
+      }
+    )
+  })
+
+  const depsAllNodes = traversalReport.data.nodeDependencies
+  Object.getOwnPropertyNames(depsAllNodes).forEach((target) => {
+    depsAllNodes[target].forEach((source) => {
+      edges.push(
+        {
+          data: { source, target, label: "" }
+        }
+      )
+    })
+  })
+  return { nodes, edges }
+}
+function drawGraph(nodesAndEdges) {
+  cydagre(cytoscape);
+  const cy = cytoscape({
+    wheelSensitivity: .1,
+    container: document.getElementById("cy"),
+    boxSelectionEnabled: true,
+    selectionType: "single",
+    autounselectify: true,
+    style: cytoscape
+      .stylesheet()
+      .selector("node")
+      .css({
+        shape: "roundrectangle",
+        height: 40,
+        width: "data(width)",
+        "background-color": (node) =>
+          node.data("active") ? "green" : "white",
+        color: (node) => (node.data("active") ? "white" : "black"),
+        "border-color": "gray",
+        "border-width": 3,
+        "border-radius": 4,
+        content: "data(name)",
+        "text-wrap": "wrap",
+        "text-valign": "center"
+      })
+      .selector("edge")
+      .css({
+        // http://js.cytoscape.org/#style/labels
+        label: "data(label)", // maps to data.label
+        "text-outline-color": "white",
+        "text-outline-width": 3,
+        "text-valign": "center",
+        "text-halign": "left",
+        // https://js.cytoscape.org/demos/edge-types/
+        "curve-style": "bezier",
+        width: 1,
+        "target-arrow-shape": "triangle",
+        "line-color": "gray",
+        "target-arrow-color": "gray",
+      }),
+    elements: nodesAndEdges,
+    layout: {
+      name: "dagre",
+      spacingFactor: .9,
+      rankDir: "LR",
+      fit: true,
+    },
+  });
+
+  cy.on('mouseover','node',function(evt){
+    console.log('entered ' + this.id());
+    evt.target.addClass('hovering')
+  })
+  cy.on('mouseout','node',function(evt){
+    evt.target.removeClass('hovering')
+  })
+  cy.on('click', 'node', function (evt) {
+    console.log('clicked ' + this.id());
+  })
+}
 
 export default {
+  data() {
+    return {
+      store: store,
+    }
+  },
   created() {
     if (port) {
       port.onMessage.addListener((msg) => {
@@ -24,36 +118,6 @@ export default {
       })
     }
   },
-  computed: {
-    D3NodesAndEdges() {
-      var nodes = {}
-      var edges = {}
-
-      this.store.traversalReport.data.nodes.forEach((n) => {
-        Object.defineProperty(nodes, n, {
-          value: { name: startCase(n) },
-          configurable: true,
-          enumerable: true,
-          writable: true,
-        })
-        var i = 0;
-        const depsAllNodes = this.store.traversalReport.data.nodeDependencies
-        Object.getOwnPropertyNames(depsAllNodes).forEach((source) => {
-          depsAllNodes[source].forEach((target) => {
-            Object.defineProperty(
-              edges, "edge" + i++, {
-              value: { source, target },
-              configurable: true,
-              enumerable: true,
-              writable: true,
-            }
-            )
-          })
-        })
-      })
-      return { nodes, edges }
-    }
-  },
   methods: {
     setMessage() {
       this.traversalReport
@@ -62,62 +126,16 @@ export default {
       this.store.traversalReport = "new message"
     }
   },
-  data() {
-    return {
-      store: store,
-      graphConfig: {
-        view: {
-          layoutHandler: new ForceLayout({
-            positionFixedByDrag: false,
-            positionFixedByClickWithAltKey: true,
-            // * The following are the default parameters for the simulation.
-            // * You can customize it by uncommenting below.
-            // createSimulation: (d3, nodes, edges) => {
-            //   const forceLink = d3.forceLink<ForceNodeDatum, ForceEdgeDatum>(edges).id(d => d.id)
-            //   return d3
-            //     .forceSimulation(nodes)
-            //     .force("edge", forceLink.distance(100))
-            //     .force("charge", d3.forceManyBody())
-            //     .force("collide", d3.forceCollide(50).strength(0.2))
-            //     .force("center", d3.forceCenter().strength(0.05))
-            //     .alphaMin(0.001)
-            // }
-          }),
-
-        },
-        node: {
-          normal: {
-            type: "rect",
-            width: 170,
-            height: 32,
-            borderRadius: 6,
-            color: "#ffffff",
-            strokeWidth: 2,
-            strokeColor: "#888888",
-          },
-          hover: {
-            color: "#eeeeee",
-          },
-        label:{
-          direction:"center"
-        },
-
-        },
-        edge: {
-          normal: {
-            width: 3,
-            color: "#ccc",
-          },
-          hover: {
-            color: "#888"
-          },
-          marker: {
-            source: {
-              type: "arrow"
-            }
-          }
-        }
-      }
+  mounted() {
+    console.log("redrawing")
+    const els = nodesAndEdges(this.store.traversalReport)
+    drawGraph(els)
+  },
+  watch: {
+    "this.store.traversalReport": function () {
+      console.log("redrawing")
+      const els = nodesAndEdges(this.store.traversalReport)
+      drawGraph(els)
     }
   },
   provide: { store: store }
@@ -125,7 +143,7 @@ export default {
 </script>
 
 <template>
-  <v-network-graph class="graph" :nodes="D3NodesAndEdges.nodes" :edges="D3NodesAndEdges.edges" :configs="graphConfig" />
+  <div id="cy" class="cy"></div>
   <img src="/images/octopus-photo.png" id="octo" />
 </template>
 
@@ -149,5 +167,9 @@ export default {
   height: 200px;
   bottom: 0;
   right: 0;
+}
+
+#cy {
+  height: 100vh
 }
 </style>

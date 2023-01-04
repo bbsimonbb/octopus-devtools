@@ -26,7 +26,6 @@ a:hover {
 
 body {
   margin: 0;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -61,7 +60,6 @@ button:focus-visible {
 
 #app {
   margin: 0 auto;
-  text-align: center;
   height:100vh;
 }
 
