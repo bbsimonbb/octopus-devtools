@@ -1,12 +1,12 @@
 <script lang="ts">
 // https://yajanarao.medium.com/create-a-data-flow-map-using-cytoscape-and-vue-js-5be3b3ef11d2
+// https://color.adobe.com/create/color-wheel#
 import { ITraversalReport } from './ITraversalReport'
 import port from "./port"
 import testData from "./testData"
 import { startCase } from "lodash"
 import cydagre from "cytoscape-dagre";
 import cytoscape from "cytoscape";
-import { stringifyStyle } from '@vue/shared';
 
 const store: { traversalReport: ITraversalReport } = { traversalReport: testData }
 
@@ -48,6 +48,7 @@ function drawGraph(nodesAndEdges) {
     boxSelectionEnabled: true,
     selectionType: "single",
     autounselectify: true,
+    /* ORDER IS IMPORTANT Last style in wins */
     style: cytoscape
       .stylesheet()
       .selector("node")
@@ -79,6 +80,54 @@ function drawGraph(nodesAndEdges) {
         "target-arrow-shape": "triangle",
         "line-color": "gray",
         "target-arrow-color": "gray",
+      })
+      .selector(".hovering")
+      .css({
+        height: 50,
+        "border-color": "#0FBDB4",
+        color: "#0FBDB4",
+        "font-weight": "bold",
+        "font-size": "bigger",
+      })
+      .selector(".predecessor")
+      .css({ 
+        color: "#BD0068",
+        "border-color": "#BD0068", 
+        "line-color": "#BD0068", 
+        "target-arrow-color": "#BD0068",
+      })
+      .selector(".incomer")
+      .css({
+        color: "#702750",
+        height: 50,
+        "border-color": "#702750",
+        "font-weight": "bold",
+      })
+      .selector("edge.incomer")
+      .css({
+        "line-color": "#702750",
+        "target-arrow-color": "#702750",
+        width:2
+      })
+      .selector(".successor")
+      .css({ 
+        color: "#BD9000",
+        "border-color": "#BD9000", 
+        "line-color": "#BD9000", 
+        "target-arrow-color": "#BD9000",
+      })
+      .selector(".outgoer")
+      .css({
+        color: "#705F26",
+        height: 50,
+        "border-color": "#705F26",
+        "font-weight": "bold",
+      })
+      .selector("edge.outgoer")
+      .css({
+        "line-color": "#705F26",
+        "target-arrow-color": "#705F26",
+        width:2
       }),
     elements: nodesAndEdges,
     layout: {
@@ -89,12 +138,21 @@ function drawGraph(nodesAndEdges) {
     },
   });
 
-  cy.on('mouseover','node',function(evt){
+  // mouseover mouseout only works when I move it above click
+  cy.on('mouseover', 'node', function (evt) {
     console.log('entered ' + this.id());
     evt.target.addClass('hovering')
+    evt.target.successors()?.addClass('successor')
+    evt.target.predecessors()?.addClass('predecessor')
+    evt.target.incomers()?.addClass('incomer')
+    evt.target.outgoers()?.addClass('outgoer')
   })
-  cy.on('mouseout','node',function(evt){
+  cy.on('mouseout', 'node', function (evt) {
     evt.target.removeClass('hovering')
+    evt.target.successors()?.removeClass('successor')
+    evt.target.predecessors()?.removeClass('predecessor')
+    evt.target.incomers()?.removeClass('incomer')
+    evt.target.outgoers()?.removeClass('outgoer')
   })
   cy.on('click', 'node', function (evt) {
     console.log('clicked ' + this.id());
