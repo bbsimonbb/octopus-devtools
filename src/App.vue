@@ -8,8 +8,16 @@ import { startCase } from "lodash"
 import cydagre from "cytoscape-dagre";
 import cytoscape from "cytoscape";
 import GraphStyles from './GraphStyles';
+import { EolStyle, Formatter, FracturedJsonOptions } from 'fracturedjsonjs'
 
-const store: { traversalReport: ITraversalReport } = { traversalReport: testData }
+const store: { traversalReport: ITraversalReport; selectedNode: string | null } = { traversalReport: testData, selectedNode: null }
+
+const options = new FracturedJsonOptions();
+options.MaxTotalLineLength = 40;
+options.MaxInlineComplexity = 1;
+options.JsonEolStyle = EolStyle.Crlf;
+
+const formatter = new Formatter();
 
 function nodesAndEdges(traversalReport) {
   var nodes = []
@@ -76,15 +84,13 @@ function drawGraph(nodesAndEdges) {
     evt.target.incomers()?.removeClass('incomer')
     evt.target.outgoers()?.removeClass('outgoer')
   })
-  cy.on('click', 'node', function (evt) {
-    console.log('clicked ' + this.id());
-  })
+  return cy
 }
 
 export default {
   data() {
     return {
-      store: store,
+      store: store
     }
   },
   created() {
@@ -104,12 +110,25 @@ export default {
     },
     newMessage() {
       this.store.traversalReport = "new message"
-    }
+    },
+    serialize(stuff) { return formatter.Serialize(stuff) },
+    startCase
   },
   mounted() {
+    const me = this
     console.log("redrawing")
     const els = nodesAndEdges(this.store.traversalReport)
-    drawGraph(els)
+    const cy = drawGraph(els)
+    cy.on('click', 'node', function (evt) {
+      evt.target.addClass('selected')
+      me.store.selectedNode = this.id()
+    })
+    cy.on('click',function(evt){
+      if(evt.target === cy){
+        me.store.selectedNode = null
+        cy.elements("*").removeClass('selected')
+      }
+    })
   },
   watch: {
     "this.store.traversalReport": function () {
@@ -124,10 +143,38 @@ export default {
 
 <template>
   <div id="cy" class="cy"></div>
+  <div id="details-pane" :class="{ active: store.selectedNode }">
+    <div v-if="store.selectedNode">
+      <div class="details-title">{{ startCase(store.selectedNode) }}</div>
+      <pre>{{ serialize(store.traversalReport.data.state[store.selectedNode]) }}</pre>
+    </div>
+  </div>
   <img src="/images/octopus-photo.png" id="octo" />
 </template>
 
 <style scoped>
+#details-pane {
+  position: absolute;
+  top: 0;
+  right: -35vw;
+  width: 30vw;
+  min-height: 200px;
+  max-height: 100vh;
+  overflow: auto;
+  transition: right 300ms ease-in-out;
+  background-color: darkcyan;
+  color:white;
+  padding:20px;
+}
+.details-title{
+font-family:Futura,Arial;
+font-size: 25px;
+}
+
+#details-pane.active {
+  right: 0vw
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

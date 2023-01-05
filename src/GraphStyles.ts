@@ -78,4 +78,13 @@ export default function (cytoscape) {
       "target-arrow-color": "#705F26",
       width: 2,
     })
+    .selector("node.selected")
+    .css({
+      "background-color":"#008b8b",
+      "border-color":"#008b8b",
+      "color":"white",
+      height: 50,
+      "font-weight": "bold",
+      "font-size": "bigger",
+    })
 }
