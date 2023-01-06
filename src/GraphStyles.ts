@@ -80,11 +80,22 @@ export default function (cytoscape) {
     })
     .selector("node.selected")
     .css({
-      "background-color":"#008b8b",
-      "border-color":"#008b8b",
-      "color":"white",
+      "background-color": "#008b8b",
+      "border-color": "#008b8b",
+      color: "white",
       height: 50,
       "font-weight": "bold",
       "font-size": "bigger",
+    })
+    .selector("node.initiator")
+    .css({
+      "border-color": "#e37332",
+      "transition": "background-color 5s ease-out",
+    })
+    .selector(".traversed")
+    .css({
+      "border-color": "#fa9d32",
+      "line-color": "#fa9d32",
+      "target-arrow-color": "#fa9d32",
     })
 }

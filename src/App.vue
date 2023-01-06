@@ -10,6 +10,7 @@ import cytoscape from "cytoscape";
 import GraphStyles from './GraphStyles';
 import { EolStyle, Formatter, FracturedJsonOptions } from 'fracturedjsonjs'
 
+var cy;
 const store: { traversalReport: ITraversalReport; selectedNode: string | null } = { traversalReport: testData, selectedNode: null }
 
 const options = new FracturedJsonOptions();
@@ -100,6 +101,16 @@ export default {
           console.log("in App.vue. message made it all the way")
           console.log(msg)
           this.store.traversalReport = msg
+          // clear prev
+          cy.$("*").removeClass('initiator').removeClass('traversed').style({"background-color":""})
+          // set styles      
+          cy.$id(msg.data.initiator).successors()?.addClass('traversed')
+          cy.$id(msg.data.initiator).addClass('initiator').style({ "background-color": "#e37332" })
+            .animate({
+              style: { "background-color": "white" },
+              duration: 3000,
+              easing: 'ease-out'
+            }).delay(4000).style({"background-color":""})
         }
       })
     }
@@ -118,25 +129,27 @@ export default {
     const me = this
     console.log("redrawing")
     const els = nodesAndEdges(this.store.traversalReport)
-    const cy = drawGraph(els)
+    cy = drawGraph(els)
     cy.on('click', 'node', function (evt) {
+      cy.elements("*").removeClass('selected')
       evt.target.addClass('selected')
       me.store.selectedNode = this.id()
     })
-    cy.on('click',function(evt){
-      if(evt.target === cy){
+    cy.on('click', function (evt) {
+      if (evt.target === cy) {
         me.store.selectedNode = null
         cy.elements("*").removeClass('selected')
       }
     })
   },
-  watch: {
-    "this.store.traversalReport": function () {
-      console.log("redrawing")
-      const els = nodesAndEdges(this.store.traversalReport)
-      drawGraph(els)
-    }
-  },
+  // never worked, don't need ? will lose state ?
+  // watch: {
+  //   "this.store.traversalReport": function () {
+  //     console.log("redrawing")
+  //     const els = nodesAndEdges(this.store.traversalReport)
+  //     drawGraph(els)
+  //   }
+  // },
   provide: { store: store }
 }
 </script>
@@ -163,12 +176,13 @@ export default {
   overflow: auto;
   transition: right 300ms ease-in-out;
   background-color: darkcyan;
-  color:white;
-  padding:20px;
+  color: white;
+  padding: 20px;
 }
-.details-title{
-font-family:Futura,Arial;
-font-size: 25px;
+
+.details-title {
+  font-family: Futura, Arial;
+  font-size: 25px;
 }
 
 #details-pane.active {
