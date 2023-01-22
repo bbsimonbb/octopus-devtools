@@ -11,7 +11,7 @@ import GraphStyles from './GraphStyles';
 import { EolStyle, Formatter, FracturedJsonOptions } from 'fracturedjsonjs'
 
 var cy;
-const store: { traversalReport: ITraversalReport; selectedNode: string | null } = { traversalReport: testData, selectedNode: null }
+const store: { traversalReport: ITraversalReport; selectedNode: string | null } = { traversalReport: null/*testData*/, selectedNode: null }
 
 const options = new FracturedJsonOptions();
 options.MaxTotalLineLength = 40;
@@ -100,17 +100,22 @@ export default {
         if (msg.source === "octopus") {
           console.log("in App.vue. message made it all the way")
           console.log(msg)
+
+          const firstMessage = !this.store.traversalReport
           this.store.traversalReport = msg
-          // clear prev
-          cy.$("*").removeClass('initiator').removeClass('traversed').style({"background-color":""})
-          // set styles      
-          cy.$id(msg.data.initiator).successors()?.addClass('traversed')
-          cy.$id(msg.data.initiator).addClass('initiator').style({ "background-color": "#e37332" })
-            .animate({
-              style: { "background-color": "white" },
-              duration: 3000,
-              easing: 'ease-out'
-            }).delay(4000).style({"background-color":""})
+          if (firstMessage) this.redraw()
+          else {
+            // clear styles from previous 
+            cy.$("*").removeClass('initiator').removeClass('traversed').style({ "background-color": "" })
+            // set styles      
+            cy.$id(msg.data.initiator).successors()?.addClass('traversed')
+            cy.$id(msg.data.initiator).addClass('initiator').style({ "background-color": "#e37332" })
+              .animate({
+                style: { "background-color": "white" },
+                duration: 3000,
+                easing: 'ease-out'
+              }).delay(4000).style({ "background-color": "" })
+          }
         }
       })
     }
@@ -123,24 +128,28 @@ export default {
       this.store.traversalReport = "new message"
     },
     serialize(stuff) { return formatter.Serialize(stuff) },
-    startCase
+    startCase,
+    redraw() {
+      console.log("redrawing")
+      const me = this
+      const els = nodesAndEdges(this.store.traversalReport)
+      cy = drawGraph(els)
+      cy.on('click', 'node', function (evt) {
+        cy.elements("*").removeClass('selected')
+        evt.target.addClass('selected')
+        me.store.selectedNode = this.id()
+      })
+      cy.on('click', function (evt) {
+        if (evt.target === cy) {
+          me.store.selectedNode = null
+          cy.elements("*").removeClass('selected')
+        }
+      })
+    }
   },
   mounted() {
     const me = this
-    console.log("redrawing")
-    const els = nodesAndEdges(this.store.traversalReport)
-    cy = drawGraph(els)
-    cy.on('click', 'node', function (evt) {
-      cy.elements("*").removeClass('selected')
-      evt.target.addClass('selected')
-      me.store.selectedNode = this.id()
-    })
-    cy.on('click', function (evt) {
-      if (evt.target === cy) {
-        me.store.selectedNode = null
-        cy.elements("*").removeClass('selected')
-      }
-    })
+    this.redraw()
   },
   // never worked, don't need ? will lose state ?
   // watch: {
