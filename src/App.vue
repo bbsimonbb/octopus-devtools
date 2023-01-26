@@ -11,7 +11,7 @@ import GraphStyles from './GraphStyles';
 import { EolStyle, Formatter, FracturedJsonOptions } from 'fracturedjsonjs'
 
 var cy;
-const store: { traversalReport: ITraversalReport; selectedNode: string | null } = { traversalReport: null/*testData*/, selectedNode: null }
+const store: { traversalReport: ITraversalReport; selectedNode: string | null } = { traversalReport: testData, selectedNode: null }
 
 const options = new FracturedJsonOptions();
 options.MaxTotalLineLength = 40;
@@ -20,11 +20,11 @@ options.JsonEolStyle = EolStyle.Crlf;
 
 const formatter = new Formatter();
 
-function nodesAndEdges(traversalReport) {
+function nodesAndEdges(traversalReport: ITraversalReport) {
   var nodes = []
   var edges = []
 
-  traversalReport.data.nodes.forEach((n) => {
+  traversalReport.data.sortedNodeNames.forEach((n) => {
     nodes.push(
       {
         data: {
@@ -38,16 +38,13 @@ function nodesAndEdges(traversalReport) {
     )
   })
 
-  const depsAllNodes = traversalReport.data.nodeDependencies
-  Object.getOwnPropertyNames(depsAllNodes).forEach((target) => {
-    depsAllNodes[target].forEach((source) => {
+    traversalReport.data.edges.forEach((edge) => {
       edges.push(
         {
-          data: { source, target, label: "" }
+          data: { source: edge.from, target: edge.to, label: "" }
         }
       )
     })
-  })
   return { nodes, edges }
 }
 function drawGraph(nodesAndEdges) {
@@ -171,7 +168,7 @@ export default {
       <pre>{{ serialize(store.traversalReport.data.state[store.selectedNode]) }}</pre>
     </div>
   </div>
-  <img src="/images/octopus-photo.png" id="octo" />
+  <img src="/images/octopus-photo.png" id="octo" @click="redraw()"/>
 </template>
 
 <style scoped>

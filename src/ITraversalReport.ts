@@ -5,8 +5,9 @@ export interface ITraversalReport {
     data: ITraversalReportData    
 }
 export interface ITraversalReportData {
-    nodes: string[]
-    nodeDependencies: any
+    sortedNodeNames: string[]
+    edges: {from:string,to:string}[]
     state:any
-    methods: any    
+    methods: any
+    initiator: string
 }
