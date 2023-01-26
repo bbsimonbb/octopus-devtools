@@ -1,10 +1,12 @@
+// https://js.cytoscape.org/
 export default function (cytoscape) {
   return cytoscape
     .stylesheet()
     .selector("node")
     .css({
       shape: "roundrectangle",
-      height: 40,
+      //height: 40,
+      height: "auto",
       width: "data(width)",
       "background-color": (node) => (node.data("active") ? "green" : "white"),
       color: (node) => (node.data("active") ? "white" : "black"),
@@ -14,6 +16,9 @@ export default function (cytoscape) {
       content: "data(name)",
       "text-wrap": "wrap",
       "text-valign": "center",
+      "text-max-width":"200",
+      "compound-sizing-wrt-labels":"include", 
+      padding:"10"   
     })
     .selector("edge")
     .css({
