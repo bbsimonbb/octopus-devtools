@@ -11,7 +11,7 @@ import GraphStyles from './GraphStyles';
 import { EolStyle, Formatter, FracturedJsonOptions } from 'fracturedjsonjs'
 
 var cy;
-const store: { traversalReport: ITraversalReport; selectedNode: string | null } = { traversalReport: testData, selectedNode: null }
+const store: { traversalReport: ITraversalReport; selectedNode: string | null } = { traversalReport: null/*testData*/, selectedNode: null }
 
 const options = new FracturedJsonOptions();
 options.MaxTotalLineLength = 40;
