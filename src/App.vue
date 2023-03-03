@@ -38,13 +38,13 @@ function nodesAndEdges(traversalReport: ITraversalReport) {
     )
   })
 
-    traversalReport.data.edges.forEach((edge) => {
-      edges.push(
-        {
-          data: { source: edge.from, target: edge.to, label: "" }
-        }
-      )
-    })
+  traversalReport.data.edges.forEach((edge) => {
+    edges.push(
+      {
+        data: { source: edge.from, target: edge.to, label: "" }
+      }
+    )
+  })
   return { nodes, edges }
 }
 function drawGraph(nodesAndEdges) {
@@ -142,6 +142,21 @@ export default {
           cy.elements("*").removeClass('selected')
         }
       })
+    },
+    openSource() {
+      chrome.devtools.inspectedWindow.getResources(
+        (resources) => {
+          debugger
+          for (const resource of resources) {
+            var canonical = resource.url.replaceAll("-", "").toLowerCase()
+            if (canonical.includes("/" + this.store.selectedNode.toLowerCase() + ".")) {
+              debugger
+              console.log(resource.url)
+              chrome.devtools.panels.openResource(resource.url, 1, function () { })              
+            }
+          }
+        }
+      )
     }
   },
   mounted() {
@@ -166,9 +181,10 @@ export default {
     <div v-if="store.selectedNode">
       <div class="details-title">{{ startCase(store.selectedNode) }}</div>
       <pre>{{ serialize(store.traversalReport.data.state[store.selectedNode]) }}</pre>
+      <a @click="openSource">Go to source</a>
     </div>
   </div>
-  <img src="/images/octopus-photo.png" id="octo" @click="redraw()"/>
+  <img src="/images/octopus-photo.png" id="octo" @click="redraw()" />
 </template>
 
 <style scoped>
@@ -183,7 +199,7 @@ export default {
   transition: right 300ms ease-in-out;
   background-color: darkcyan;
   color: white;
-  padding: 20px;
+  padding: 20px 20px 100px 20px;
 }
 
 .details-title {
