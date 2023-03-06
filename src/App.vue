@@ -94,7 +94,7 @@ export default {
   created() {
     if (port) {
       port.onMessage.addListener((msg) => {
-        if (msg.source === "octopus") {
+        if (msg.source === "octopus" && /:[0-9]+$/gm.test(msg.origin)) {
           console.log("in App.vue. message made it all the way")
           console.log(msg)
 

@@ -12,8 +12,8 @@ window.addEventListener('message', function(event) {
   if (event.source !== window) {
     return;
   }
-
-  var message = event.data;
+  var message = event.data
+  message.origin = event.origin
 
   // Only accept messages of correct format (our messages)
   if (typeof message !== 'object' || message === null ||
@@ -22,6 +22,6 @@ window.addEventListener('message', function(event) {
   }
   console.log("after.js captured message and will resend to service worker")
 
-  chrome.runtime?.sendMessage(message);
+  chrome.runtime?.sendMessage(message)
   chrome.tabs?.sendMessage(message)
 });
