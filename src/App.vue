@@ -146,12 +146,9 @@ export default {
     openSource() {
       chrome.devtools.inspectedWindow.getResources(
         (resources) => {
-          debugger
           for (const resource of resources) {
             var canonical = resource.url.replaceAll("-", "").toLowerCase()
             if (canonical.includes("/" + this.store.selectedNode.toLowerCase() + ".")) {
-              debugger
-              console.log(resource.url)
               chrome.devtools.panels.openResource(resource.url, 1, function () { })              
             }
           }
