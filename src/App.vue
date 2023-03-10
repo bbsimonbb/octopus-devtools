@@ -175,16 +175,21 @@ export default {
 <template>
   <div id="cy" class="cy"></div>
   <div id="details-pane" :class="{ active: store.selectedNode }">
-    <div v-if="store.selectedNode">
+    <div v-if="store.selectedNode" id="details-pane-inner">
       <div class="details-title">{{ startCase(store.selectedNode) }}</div>
       <pre>{{ serialize(store.traversalReport.data.state[store.selectedNode]) }}</pre>
-      <a @click="openSource">Go to source</a>
+      <div class="func" v-for="func in store.traversalReport.data.methods[store.selectedNode]"><span>ƒ</span> {{ func }}()</div>
+      <b><a @click="openSource">Go to source</a></b>
     </div>
   </div>
   <img src="/images/octopus-photo.png" id="octo" @click="redraw()" />
 </template>
 
-<style scoped>
+<style>
+body{  
+  font-family: Futura, Arial;
+}
+a{cursor: pointer;}
 #details-pane {
   position: absolute;
   top: 0;
@@ -196,11 +201,12 @@ export default {
   transition: right 300ms ease-in-out;
   background-color: darkcyan;
   color: white;
-  padding: 20px 20px 100px 20px;
+}
+#details-pane-inner{
+  padding: 20px 20px 150px 20px;
 }
 
 .details-title {
-  font-family: Futura, Arial;
   font-size: 25px;
 }
 
@@ -224,12 +230,19 @@ export default {
 
 #octo {
   position: absolute;
-  height: 200px;
+  height: 100px;
   bottom: 0;
   right: 0;
 }
 
 #cy {
   height: 100vh
+}
+
+.func{
+  padding: 10px 0px;  
+}
+.func span{
+  color: darkkhaki
 }
 </style>
