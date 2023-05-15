@@ -1,6 +1,6 @@
 // this code will be executed after page load
 (function() {
-  console.log('after.js executed');
+  //console.log('after.js executed');
   window.postMessage({octopusDevtoolsPresent:true},"*")
 })();
 
@@ -20,7 +20,7 @@ window.addEventListener('message', function(event) {
       message.source !== 'octopus') {
     return;
   }
-  console.log("after.js captured message and will resend to service worker")
+  //console.log("after.js captured message and will resend to service worker")
 
   chrome.runtime?.sendMessage(message)
   chrome.tabs?.sendMessage(message)

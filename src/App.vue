@@ -68,7 +68,7 @@ function drawGraph(nodesAndEdges) {
 
   // mouseover mouseout only works when I move it above click
   cy.on('mouseover', 'node', function (evt) {
-    console.log('entered ' + this.id());
+    //console.log('entered ' + this.id());
     evt.target.addClass('hovering')
     evt.target.successors()?.addClass('successor')
     evt.target.predecessors()?.addClass('predecessor')
@@ -95,8 +95,8 @@ export default {
     if (port) {
       port.onMessage.addListener((msg) => {
         if (msg.source === "octopus" && /:[0-9]+$/gm.test(msg.origin)) {
-          console.log("in App.vue. message made it all the way")
-          console.log(msg)
+          //console.log("in App.vue. message made it all the way")
+          //console.log(msg)
 
           const firstMessage = !this.store.traversalReport
           this.store.traversalReport = msg
@@ -127,7 +127,7 @@ export default {
     serialize(stuff) { return formatter.Serialize(stuff) },
     startCase,
     redraw() {
-      console.log("redrawing")
+      //console.log("redrawing")
       const me = this
       const els = nodesAndEdges(this.store.traversalReport)
       cy = drawGraph(els)

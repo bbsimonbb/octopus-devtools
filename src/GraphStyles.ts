@@ -94,7 +94,7 @@ export default function (cytoscape) {
     })
     .selector("node.initiator")
     .css({
-      "border-color": "#e37332",
+      "border-color": "#e75f10",
       "transition": "background-color 5s ease-out",
     })
     .selector(".traversed")

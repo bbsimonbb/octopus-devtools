@@ -31,6 +31,8 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
   } else {
     console.log("sender.tab not defined.");
   }
+  // Is this the cause of my fantom error ?
+  // https://developer.chrome.com/docs/extensions/mv3/messaging/
   return true;
 });
 
@@ -42,7 +44,7 @@ chrome.runtime.onConnect.addListener(function(port) {
 
   // Listen to messages sent from the DevTools page
   port.onMessage.addListener(function(request) {
-    console.log('incoming message from dev tools page', request);
+    //console.log('incoming message from dev tools page', request);
 
     // Register initial connection
     if (request.name === 'init') {
